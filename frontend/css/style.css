@@ -1,0 +1,66 @@
+* {
+
+body {
+    background: #0f1115;
+    color: white;
+    min-height: 100vh;
+}
+
+.topbar {
+    width: 100%;
+    padding: 20px;
+    background: #161a22;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #222;
+}
+
+.dashboard {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 20px;
+    padding: 20px;
+}
+
+.card {
+    background: #161a22;
+    border-radius: 16px;
+    padding: 20px;
+    border: 1px solid #222;
+}
+
+.hero-card {
+    text-align: center;
+}
+
+#aqi-value {
+    font-size: 64px;
+    margin-top: 20px;
+    font-weight: bold;
+}
+
+#aqi-status {
+    margin-top: 10px;
+    font-size: 22px;
+}
+
+.logs-card {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+#logs {
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.log-item {
+    background: #20242d;
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 14px;
+}
+}

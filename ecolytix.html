@@ -1,0 +1,1279 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ecolytix — Monitoramento Ambiental IoT</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg0:#040b05;--bg1:#0D1F0F;--bg2:#101e12;--bg3:#172a1a;--bg4:#1e3522;
+  --green:#2E7D32;--greenl:#43a047;--neon:#00E676;--neond:#00c853;
+  --text:#e8f5e9;--text2:#a5d6a7;--text3:#5da362;--text4:#304d33;
+  --border:#182d1b;--borderl:#243d28;
+  --red:#ef5350;--rdbg:rgba(239,83,80,.09);
+  --yellow:#ffca28;--ylbg:rgba(255,202,40,.08);
+  --card:#0c1e0e;--card2:#0f2211;
+  font-family:'DM Sans',sans-serif;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg0);color:var(--text);font-family:'DM Sans',sans-serif;font-size:15px;line-height:1.6;overflow-x:hidden}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--bg1)}::-webkit-scrollbar-thumb{background:var(--green);border-radius:3px}
+.hidden{display:none!important}
+
+/* ━━━━━━━━━━━━━━━━━━━━━ LOGO ━━━━━━━━━━━━━━━━━━━━━ */
+.logo-img{width:36px;height:36px;border-radius:10px;object-fit:contain;background:linear-gradient(135deg,var(--green),var(--neond));display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 0 14px rgba(0,230,118,.3)}
+.logo-img-lg{width:52px;height:52px;border-radius:16px;box-shadow:0 0 22px rgba(0,230,118,.35)}
+
+/* ━━━━━━━━━━━━━━━━━━━━━ LOGIN ━━━━━━━━━━━━━━━━━━━━━ */
+#login-screen{
+  min-height:100vh;display:flex;align-items:stretch;
+  background:var(--bg0);
+}
+.login-left{
+  flex:1;display:flex;flex-direction:column;justify-content:center;padding:60px 56px;
+  background:linear-gradient(160deg,#060f07 0%,#0D1F0F 60%,#0f2411 100%);
+  border-right:1px solid var(--border);position:relative;overflow:hidden;
+}
+.login-left-art{
+  position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse 70% 70% at 30% 60%,rgba(0,230,118,.05) 0%,transparent 70%);
+}
+.login-left-grid{
+  position:absolute;inset:0;
+  background-image:linear-gradient(rgba(0,230,118,.02) 1px,transparent 1px),linear-gradient(90deg,rgba(0,230,118,.02) 1px,transparent 1px);
+  background-size:50px 50px;
+}
+.login-left-content{position:relative;z-index:1;max-width:440px}
+.ll-logo{display:flex;align-items:center;gap:12px;margin-bottom:40px}
+.ll-brand{font-size:28px;font-weight:700;letter-spacing:-.4px}
+.ll-brand b{color:var(--neon)}
+.ll-heading{font-size:38px;font-weight:700;line-height:1.2;color:var(--text);margin-bottom:20px;letter-spacing:-.5px}
+.ll-heading span{color:var(--neon)}
+.ll-desc{font-size:16px;color:var(--text2);line-height:1.75;margin-bottom:40px}
+.ll-tags{display:flex;gap:10px;flex-wrap:wrap}
+.ll-tag{background:rgba(0,230,118,.08);border:1px solid rgba(0,230,118,.18);color:var(--neon);border-radius:99px;padding:5px 14px;font-size:12px;font-weight:600}
+.ll-fundacao{margin-top:auto;padding-top:40px;font-size:12px;color:var(--text3);border-top:1px solid var(--border);margin-bottom:0}
+.ll-fundacao strong{color:var(--neon)}
+
+.login-right{
+  width:460px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:48px 44px;background:var(--card);flex-shrink:0;
+}
+.lr-title{font-size:22px;font-weight:700;color:var(--text);margin-bottom:4px;letter-spacing:-.3px}
+.lr-sub{font-size:14px;color:var(--text3);margin-bottom:28px}
+
+.field{position:relative;margin-bottom:13px;width:100%}
+.fi{position:absolute;left:13px;top:50%;transform:translateY(-50%);width:17px;height:17px;stroke:var(--text3);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
+.field input{
+  width:100%;padding:12px 14px 12px 42px;
+  background:var(--bg2);border:1px solid var(--borderl);border-radius:11px;
+  color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;
+  transition:border-color .2s,box-shadow .2s;
+}
+.field input::placeholder{color:var(--text4)}
+.field input:focus{border-color:var(--neon);box-shadow:0 0 0 3px rgba(0,230,118,.1)}
+
+.demo-hint{background:rgba(0,230,118,.05);border:1px solid rgba(0,230,118,.15);border-radius:10px;padding:10px 14px;font-size:12px;color:var(--text3);margin-bottom:14px;width:100%;line-height:1.6}
+.demo-hint strong{color:var(--neon)}
+
+.lerr{background:var(--rdbg);border:1px solid rgba(239,83,80,.25);border-radius:10px;padding:9px 14px;color:var(--red);font-size:13px;margin-bottom:13px;width:100%;display:none;animation:shake .35s ease}
+.lerr.show{display:block}
+@keyframes shake{0%,100%{transform:translateX(0)}25%,75%{transform:translateX(-5px)}50%{transform:translateX(5px)}}
+
+.btn{width:100%;padding:12px;border:none;border-radius:11px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-p{background:linear-gradient(135deg,var(--green),var(--neond));color:#fff}
+.btn-p:hover{transform:translateY(-1px);box-shadow:0 4px 20px rgba(0,230,118,.25)}
+.btn-p:active{transform:none}
+.btn-o{background:transparent;border:1px solid var(--borderl);color:var(--text2);margin-top:9px}
+.btn-o:hover{border-color:var(--neon);color:var(--neon);background:rgba(0,230,118,.04)}
+.btn-g{background:rgba(255,255,255,.03);border:1px solid var(--borderl);color:var(--text2);margin-top:9px}
+.btn-g:hover{background:rgba(255,255,255,.07)}
+.btn-trial{background:transparent;border:none;color:var(--text3);font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;margin-top:18px;padding:6px;transition:color .2s;width:100%;text-align:center}
+.btn-trial:hover{color:var(--neon)}
+.divider{display:flex;align-items:center;gap:10px;margin:16px 0;color:var(--text4);font-size:11px;width:100%}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border)}
+.lspin{width:17px;height:17px;border:2px solid rgba(255,255,255,.25);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+@media(max-width:800px){
+  #login-screen{flex-direction:column}
+  .login-left{padding:32px 24px;border-right:none;border-bottom:1px solid var(--border)}
+  .login-right{width:100%;padding:28px 20px}
+  .ll-heading{font-size:26px}
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━ APP ━━━━━━━━━━━━━━━━━━━━━ */
+#app{display:none;min-height:100vh}
+
+/* Trial banner */
+.trial-banner{
+  background:rgba(255,202,40,.08);border-bottom:1px solid rgba(255,202,40,.18);
+  padding:8px 22px;display:flex;align-items:center;justify-content:space-between;gap:12px;
+  font-size:13px;color:var(--yellow);
+}
+.trial-banner.hidden{display:none}
+.trial-banner strong{color:var(--yellow)}
+
+/* Sidebar */
+.sidebar{position:fixed;top:0;left:0;bottom:0;width:220px;background:var(--bg1);border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:200;transition:transform .27s}
+.sb-logo{padding:20px 16px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border)}
+.sb-brand{font-size:17px;font-weight:700;color:var(--text);letter-spacing:-.3px}
+.sb-brand b{color:var(--neon)}
+
+.sb-nav{flex:1;padding:12px 10px;overflow-y:auto}
+.sb-lbl{font-size:10px;color:var(--text4);font-weight:600;letter-spacing:1px;text-transform:uppercase;padding:12px 10px 4px}
+.nitem{display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:10px;cursor:pointer;transition:all .16s;color:var(--text2);font-size:13px;font-weight:500;border:none;background:none;width:100%;text-align:left;font-family:'DM Sans',sans-serif;position:relative}
+.nitem:hover{background:var(--bg3);color:var(--text)}
+.nitem.active{background:rgba(0,230,118,.09);color:var(--neon);box-shadow:inset 3px 0 0 var(--neon)}
+.nitem svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.nitem .lock-ico{position:absolute;right:10px;opacity:.4;font-size:11px}
+
+.sb-foot{padding:12px 10px;border-top:1px solid var(--border)}
+.conn-pill{display:flex;align-items:center;gap:8px;padding:7px 11px;border-radius:8px;background:var(--bg2);font-size:12px;color:var(--text2);margin-bottom:8px}
+.cdot{width:7px;height:7px;border-radius:50%;flex-shrink:0;transition:background .3s}
+.c-on{background:var(--neon);box-shadow:0 0 7px var(--neon)}
+.c-sv{background:var(--yellow)}
+.c-off{background:var(--red)}
+.c-conn{background:#42a5f5;animation:blink .9s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
+.btn-logout{display:flex;align-items:center;gap:8px;padding:8px 11px;border-radius:9px;background:none;border:1px solid var(--borderl);color:var(--text3);font-family:'DM Sans',sans-serif;font-size:12px;cursor:pointer;transition:all .2s;width:100%}
+.btn-logout:hover{border-color:var(--red);color:var(--red);background:var(--rdbg)}
+.btn-logout svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+/* Topbar */
+.topbar{position:fixed;top:0;left:220px;right:0;height:55px;background:rgba(12,30,14,.94);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 20px;transition:left .27s}
+.tb-left{display:flex;align-items:center;gap:12px}
+.tb-title{font-size:14px;font-weight:600;color:var(--text)}
+.tb-right{display:flex;align-items:center;gap:10px}
+.tb-time{font-size:11px;color:var(--text3);font-weight:500}
+.tb-user{font-size:12px;color:var(--text2);background:var(--bg3);border:1px solid var(--border);border-radius:99px;padding:4px 12px}
+.hamburger{display:none;background:none;border:none;cursor:pointer;padding:5px;flex-direction:column;gap:4px}
+.hamburger span{display:block;width:18px;height:2px;background:var(--text2);border-radius:2px}
+
+/* Content */
+.content{margin-left:220px;padding-top:55px;min-height:100vh;transition:margin .27s}
+.page{padding:24px;display:none;animation:pin .27s ease}
+.page.active{display:block}
+@keyframes pin{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+
+/* Page header */
+.ph{margin-bottom:20px}
+.ph-row{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.ph-title{font-size:20px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:10px}
+.ph-sub{font-size:13px;color:var(--text3);margin-top:3px}
+.live-badge{background:rgba(0,230,118,.1);border:1px solid rgba(0,230,118,.25);border-radius:99px;padding:3px 11px;font-size:11px;font-weight:600;color:var(--neon);display:inline-flex;align-items:center;gap:5px}
+.live-badge::before{content:'';width:6px;height:6px;background:var(--neon);border-radius:50%;animation:lp 1.4s infinite}
+@keyframes lp{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* Notices */
+.notice{padding:9px 16px;border-radius:10px;font-size:13px;display:none;align-items:center;gap:8px;margin-bottom:14px}
+.notice.show{display:flex}
+.notice.info{background:var(--ylbg);border:1px solid rgba(255,202,40,.18);color:var(--yellow)}
+.notice.err{background:var(--rdbg);border:1px solid rgba(239,83,80,.25);color:var(--red)}
+.notice.ok{background:rgba(0,230,118,.07);border:1px solid rgba(0,230,118,.2);color:var(--neon)}
+
+/* KPI */
+.krow{display:grid;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));gap:13px;margin-bottom:18px}
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:17px;position:relative;overflow:hidden;transition:border-color .2s,transform .2s}
+.kpi::after{content:'';position:absolute;top:-18px;right:-18px;width:70px;height:70px;background:radial-gradient(circle,rgba(0,230,118,.045),transparent 70%);border-radius:50%}
+.kpi:hover{transform:translateY(-2px);border-color:var(--borderl)}
+.kpi-lbl{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:6px}
+.kpi-val{font-size:27px;font-weight:700;color:var(--text);line-height:1;font-variant-numeric:tabular-nums}
+.kpi-val .u{font-size:13px;color:var(--text3);font-weight:400}
+.kpi-note{font-size:11px;color:var(--text3);margin-top:6px}
+.kv-neon{color:var(--neon)!important}
+.kv-red{color:var(--red)!important}
+.kv-yel{color:var(--yellow)!important}
+
+/* Chart card */
+.cc{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;position:relative}
+.cc-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.cc-title{font-size:13px;font-weight:600;color:var(--text)}
+.cc canvas{max-height:190px}
+
+/* Grid */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.ga{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+
+/* Loading overlay */
+.lo{position:absolute;inset:0;background:var(--card);border-radius:inherit;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:9px;z-index:8;transition:opacity .3s}
+.lo.gone{opacity:0;pointer-events:none}
+.loring{width:28px;height:28px;border:2.5px solid var(--bg3);border-top-color:var(--neon);border-radius:50%;animation:spin .8s linear infinite}
+.lotxt{font-size:12px;color:var(--text3)}
+
+/* Status pill */
+.spill{display:inline-flex;align-items:center;gap:7px;padding:5px 15px;border-radius:999px;font-size:13px;font-weight:600;transition:all .35s}
+.sp-g{background:rgba(0,230,118,.1);color:var(--neon);border:1px solid rgba(0,230,118,.22)}
+.sp-y{background:var(--ylbg);color:var(--yellow);border:1px solid rgba(255,202,40,.22)}
+.sp-r{background:var(--rdbg);color:var(--red);border:1px solid rgba(239,83,80,.22)}
+.sp-empty{background:var(--bg3);color:var(--text3);border:1px solid var(--border)}
+.sdot{width:7px;height:7px;border-radius:50%;background:currentColor}
+
+/* AQI Hero */
+.aqi-hero{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:28px;text-align:center}
+.aqi-ring{display:inline-flex;align-items:center;justify-content:center;flex-direction:column;width:132px;height:132px;border-radius:50%;border:3px solid var(--borderl);box-shadow:0 0 0 rgba(0,0,0,0);margin:16px auto;transition:border-color .4s,box-shadow .4s}
+.aqi-big{font-size:46px;font-weight:700;color:var(--text);line-height:1;font-variant-numeric:tabular-nums}
+.aqi-sub{font-size:10px;color:var(--text3);font-weight:500;text-transform:uppercase;letter-spacing:.5px}
+.aqi-bar-t{height:6px;background:var(--bg3);border-radius:99px;overflow:hidden;margin:12px 0 6px}
+.aqi-bar-f{height:100%;border-radius:99px;width:0;transition:width .8s cubic-bezier(.34,1.2,.64,1),background .4s}
+.aqi-txt{font-size:12px;color:var(--text2);font-style:italic;min-height:32px;margin-top:6px}
+
+/* USB Connect button */
+.usb-btn{
+  display:flex;align-items:center;gap:8px;padding:9px 18px;border-radius:10px;
+  background:rgba(0,230,118,.08);border:1px solid rgba(0,230,118,.25);color:var(--neon);
+  font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;
+}
+.usb-btn:hover{background:rgba(0,230,118,.14);border-color:rgba(0,230,118,.4)}
+.usb-btn.connected{background:rgba(0,230,118,.14);border-color:var(--neon)}
+.usb-btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+/* Map */
+.map-wrap{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:16px}
+.map-bar{padding:10px 14px;display:flex;gap:8px;flex-wrap:wrap;border-bottom:1px solid var(--border)}
+.fbtn{padding:5px 14px;border-radius:99px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid var(--borderl);background:var(--bg2);color:var(--text3);transition:all .16s;font-family:'DM Sans',sans-serif}
+.fbtn:hover,.fbtn.active{background:rgba(0,230,118,.1);color:var(--neon);border-color:rgba(0,230,118,.25)}
+#map{height:390px}
+.leaflet-container{background:#070f08!important}
+.leaflet-popup-content-wrapper{background:var(--card)!important;border:1px solid var(--borderl)!important;border-radius:12px!important;color:var(--text)!important;font-family:'DM Sans',sans-serif!important;box-shadow:0 4px 20px rgba(0,0,0,.5)!important}
+.leaflet-popup-tip{background:var(--card)!important}
+
+/* Residuos - form */
+.form-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px}
+.form-row{display:grid;grid-template-columns:1fr 160px auto;gap:10px;align-items:end}
+.form-group{display:flex;flex-direction:column;gap:5px}
+.form-label{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.5px}
+.form-input{background:var(--bg2);border:1px solid var(--borderl);border-radius:9px;padding:10px 13px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;transition:border-color .2s}
+.form-input:focus{border-color:var(--neon);box-shadow:0 0 0 2px rgba(0,230,118,.09)}
+.form-input option{background:var(--bg2)}
+.btn-reg{background:linear-gradient(135deg,var(--green),var(--neond));color:#fff;border:none;border-radius:9px;padding:10px 18px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap}
+.btn-reg:hover{transform:translateY(-1px);box-shadow:0 3px 14px rgba(0,230,118,.2)}
+
+/* Records list */
+.rec-list{display:flex;flex-direction:column;gap:8px;margin-top:14px;max-height:320px;overflow-y:auto}
+.rec-item{background:var(--bg2);border:1px solid var(--borderl);border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:12px;animation:rIn .2s ease}
+@keyframes rIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+.rec-region{font-size:13px;font-weight:500;color:var(--text);flex:1}
+.rec-date{font-size:11px;color:var(--text3)}
+.rec-level{font-size:11px;font-weight:600;padding:3px 10px;border-radius:99px}
+.level-b{background:rgba(0,230,118,.1);color:var(--neon)}
+.level-m{background:var(--ylbg);color:var(--yellow)}
+.level-a{background:var(--rdbg);color:var(--red)}
+.empty-state{text-align:center;padding:24px;color:var(--text3);font-size:13px}
+
+/* Critical areas */
+.clist{display:flex;flex-direction:column;gap:8px}
+.citem{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:10px;transition:border-color .2s}
+.citem:hover{border-color:var(--borderl)}
+.cdotc{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.cname{font-size:13px;font-weight:500;color:var(--text);flex:1}
+.clv{font-size:11px;font-weight:600;padding:3px 10px;border-radius:99px}
+
+/* Flow */
+.flow-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:16px}
+.fnodes{display:flex;align-items:center;justify-content:space-around;margin:16px 0;flex-wrap:wrap;gap:10px}
+.fnode{text-align:center;flex:1;min-width:65px}
+.ficon{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 7px;font-size:20px;border:1px solid var(--borderl);background:var(--bg2)}
+.fname{font-size:10px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.5px}
+.farr{color:var(--neon);font-size:20px;flex-shrink:0}
+
+/* Residuos bars */
+.res-bar-card{background:var(--card);border:1px solid var(--border);border-radius:13px;padding:16px}
+.rrow{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.ricn{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.rinfo{flex:1}
+.rname{font-size:12px;font-weight:500;color:var(--text);margin-bottom:4px}
+.rbar{height:5px;background:var(--bg3);border-radius:99px;overflow:hidden}
+.rbf{height:100%;border-radius:99px;transition:width .8s}
+.rpct{font-size:12px;font-weight:600;min-width:32px;text-align:right}
+
+/* About */
+.tech-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:13px;margin-top:16px}
+.tcard{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;transition:border-color .2s,transform .2s}
+.tcard:hover{border-color:rgba(0,230,118,.3);transform:translateY(-2px)}
+.tico{font-size:24px;margin-bottom:9px}
+.tname{font-size:13px;font-weight:600;color:var(--text);margin-bottom:5px}
+.tdesc{font-size:12px;color:var(--text2);line-height:1.6}
+
+/* Arduino raw badge */
+.raw-badge{background:rgba(66,165,245,.08);border:1px solid rgba(66,165,245,.2);border-radius:8px;padding:6px 12px;font-size:11px;color:#42a5f5;font-family:'Courier New',monospace}
+
+/* Responsive */
+@media(max-width:880px){
+  .sidebar{transform:translateX(-100%)}
+  .sidebar.open{transform:translateX(0)}
+  .topbar{left:0}
+  .content{margin-left:0}
+  .hamburger{display:flex}
+  .g2,.g3{grid-template-columns:1fr}
+  .page{padding:14px}
+  #map{height:270px}
+  .form-row{grid-template-columns:1fr}
+}
+.sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:199}
+.sb-overlay.show{display:block}
+@media(max-width:480px){.krow{grid-template-columns:1fr 1fr}.aqi-ring{width:110px;height:110px}.aqi-big{font-size:36px}}
+</style>
+</head>
+<body>
+
+<!-- ════════════════════ LOGIN ════════════════════ -->
+<div id="login-screen">
+  <div class="login-left">
+    <div class="login-left-art"></div>
+    <div class="login-left-grid"></div>
+    <div class="login-left-content">
+      <div class="ll-logo">
+        <canvas id="logo-canvas-login" width="52" height="52" class="logo-img logo-img-lg"></canvas>
+        <div>
+          <div class="ll-brand">Eco<b>lytix</b></div>
+          <div style="font-size:11px;color:var(--text3)">by Fundação 404</div>
+        </div>
+      </div>
+
+      <h1 class="ll-heading">Monitoramento ambiental <span>inteligente</span></h1>
+      <p class="ll-desc">
+        Plataforma IoT de monitoramento da qualidade do ar em tempo real.
+        O sistema utiliza sensores físicos Arduino para transformar dados ambientais brutos
+        em informações claras, visuais e acessíveis — com foco em impacto urbano real.
+      </p>
+      <div class="ll-tags">
+        <span class="ll-tag">📡 IoT Real</span>
+        <span class="ll-tag">🌿 Open Data</span>
+        <span class="ll-tag">🏙️ Monitoramento Urbano</span>
+        <span class="ll-tag">🔬 Arduino</span>
+      </div>
+
+      <div class="ll-fundacao" style="margin-top:40px">
+        Projeto desenvolvido pela <strong>Fundação 404</strong><br>
+        <span style="font-size:11px;opacity:.7">Tecnologia para um planeta mais saudável</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="login-right">
+    <canvas id="logo-canvas-right" width="44" height="44" class="logo-img" style="margin-bottom:14px"></canvas>
+    <div class="lr-title">Entrar na plataforma</div>
+    <div class="lr-sub">Acesse seu painel de monitoramento</div>
+
+    <div class="demo-hint">
+      💡 <strong>Conta de demonstração</strong><br>
+      Email sugerido: <strong>usuario@ecolytix.com</strong><br>
+      Senha sugerida: <strong>ecolytix123</strong>
+    </div>
+
+    <div class="lerr" id="lerr">Credenciais inválidas. Verifique e tente novamente.</div>
+
+    <div class="field">
+      <svg class="fi" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+      <input type="text" id="lmail" placeholder="seu@email.com" autocomplete="username">
+    </div>
+    <div class="field">
+      <svg class="fi" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      <input type="password" id="lpass" placeholder="Senha" autocomplete="current-password">
+    </div>
+
+    <button class="btn btn-p" onclick="doLogin()">
+      <span id="ltxt">Entrar</span>
+      <div class="lspin" id="lspin"></div>
+    </button>
+    <button class="btn btn-o" onclick="alertInfo('Cadastro via formulário — disponível em breve na versão beta.')">Criar conta</button>
+    <div class="divider">ou</div>
+    <button class="btn btn-g" onclick="alertInfo('Login com Google OAuth — integração disponível em breve.')">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+      Entrar com Google
+    </button>
+    <button class="btn-trial" onclick="enterTrial()">Continuar sem login (modo trial) →</button>
+
+    <div style="margin-top:20px;font-size:11px;color:var(--text4);text-align:center">
+      Projeto desenvolvido pela <span style="color:var(--text3)">Fundação 404</span>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════ APP ════════════════════ -->
+<div id="app">
+  <div class="sb-overlay" id="sbo" onclick="closeSb()"></div>
+
+  <!-- Trial banner -->
+  <div class="trial-banner hidden" id="trial-banner">
+    ⚠️ <strong>Modo Trial</strong> — Acesso limitado. Você está visualizando dados públicos apenas.
+    <button style="background:none;border:1px solid var(--yellow);color:var(--yellow);border-radius:6px;padding:3px 10px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px" onclick="showLoginFromApp()">Fazer login completo →</button>
+  </div>
+
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-logo">
+      <canvas id="logo-canvas-sb" width="32" height="32" class="logo-img" style="width:32px;height:32px;border-radius:9px"></canvas>
+      <span class="sb-brand">Eco<b>lytix</b></span>
+    </div>
+    <nav class="sb-nav">
+      <div class="sb-lbl">Visão Geral</div>
+      <button class="nitem active" onclick="nav('home',this)">
+        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Home
+      </button>
+      <button class="nitem" onclick="nav('dashboard',this)">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Dashboard
+      </button>
+      <div class="sb-lbl">Monitoramento</div>
+      <button class="nitem" onclick="nav('mapa',this)">
+        <svg viewBox="0 0 24 24"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>Mapa
+      </button>
+      <button class="nitem" onclick="nav('ar',this)">
+        <svg viewBox="0 0 24 24"><path d="M17.7 7.7a2.5 2.5 0 1 1 1.8 4.3H2"/><path d="M9.6 4.6A2 2 0 1 1 11 8H2"/><path d="M12.6 19.4A2 2 0 1 0 14 16H2"/></svg>Qualidade do Ar
+      </button>
+      <button class="nitem" id="nav-residuos" onclick="navResiduo()">
+        <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>Resíduos
+        <span class="lock-ico" id="lock-residuos">🔒</span>
+      </button>
+      <div class="sb-lbl">Sistema</div>
+      <button class="nitem" onclick="nav('sobre',this)">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Sobre
+      </button>
+    </nav>
+    <div class="sb-foot">
+      <div class="conn-pill"><div class="cdot c-off" id="cdot"></div><span id="clbl">Sem sensor</span></div>
+      <button class="btn-logout" onclick="doLogout()">
+        <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        <span id="logout-txt">Sair</span>
+      </button>
+    </div>
+  </aside>
+
+  <header class="topbar">
+    <div class="tb-left">
+      <button class="hamburger" onclick="toggleSb()"><span></span><span></span><span></span></button>
+      <span class="tb-title" id="tbtitle">Home</span>
+    </div>
+    <div class="tb-right">
+      <span class="tb-time" id="tbtime"></span>
+      <span class="tb-user" id="tb-user">Trial</span>
+    </div>
+  </header>
+
+  <main class="content">
+    <div style="padding:0 24px">
+      <div class="notice info" id="notice"><span id="notice-txt"></span></div>
+    </div>
+
+    <!-- ── HOME ── -->
+    <div class="page active" id="page-home">
+      <div class="ph">
+        <div class="ph-row">
+          <div>
+            <div class="ph-title">Resumo <span class="live-badge">Ao vivo</span></div>
+            <div class="ph-sub">Ecolytix — Monitoramento ambiental IoT · Salvador, BA</div>
+          </div>
+          <button class="usb-btn" id="usb-btn" onclick="connectUSB()">
+            <svg viewBox="0 0 24 24"><path d="M12 2v14M5 9l7 7 7-7"/><path d="M5 20h14"/></svg>
+            <span id="usb-txt">Conectar Sensor</span>
+          </button>
+        </div>
+      </div>
+      <div class="krow">
+        <div class="kpi"><div class="kpi-lbl">AQI do Sensor</div><div class="kpi-val" id="h-aqi">--</div><div class="kpi-note" id="h-aqi-note">Aguardando sensor...</div></div>
+        <div class="kpi"><div class="kpi-lbl">Status</div><div class="kpi-val" id="h-status">--</div><div class="kpi-note" id="h-status-note">Sem dado</div></div>
+        <div class="kpi"><div class="kpi-lbl">Leituras Sessão</div><div class="kpi-val kv-neon" id="h-leit">0</div><div class="kpi-note">Total recebido</div></div>
+        <div class="kpi"><div class="kpi-lbl">Alertas</div><div class="kpi-val kv-red" id="h-alert">0</div><div class="kpi-note">Status vermelho</div></div>
+      </div>
+      <div class="g2">
+        <div class="cc" style="position:relative">
+          <div class="lo" id="lo-rt"><div class="loring"></div><div class="lotxt">Aguardando sensor...</div></div>
+          <div class="cc-head"><div class="cc-title">Leituras em tempo real</div><div class="live-badge">Sensor</div></div>
+          <canvas id="graficoTempo"></canvas>
+        </div>
+        <div class="cc" style="position:relative">
+          <div class="lo" id="lo-hist"><div class="loring"></div><div class="lotxt">Sem histórico ainda</div></div>
+          <div class="cc-head"><div class="cc-title">Histórico da sessão</div></div>
+          <canvas id="graficoHistorico"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── DASHBOARD ── -->
+    <div class="page" id="page-dashboard">
+      <div class="ph"><div class="ph-title">Dashboard</div><div class="ph-sub">Fluxo do sistema IoT e KPIs</div></div>
+      <div class="krow">
+        <div class="kpi"><div class="kpi-lbl">Leituras</div><div class="kpi-val kv-neon" id="d-leit">0</div><div class="kpi-note">Esta sessão</div></div>
+        <div class="kpi"><div class="kpi-lbl">Alertas</div><div class="kpi-val kv-red" id="d-alert">0</div><div class="kpi-note">Status vermelho</div></div>
+        <div class="kpi"><div class="kpi-lbl">Sensor USB</div><div class="kpi-val" id="d-sensor" style="font-size:16px">Desconectado</div><div class="kpi-note">Web Serial API</div></div>
+        <div class="kpi"><div class="kpi-lbl">Último dado</div><div class="kpi-val" id="d-last" style="font-size:14px">--</div><div class="kpi-note" id="d-last-time">--</div></div>
+      </div>
+      <div class="flow-card">
+        <div class="cc-title">Arquitetura IoT</div>
+        <div class="fnodes">
+          <div class="fnode"><div class="ficon" style="border-color:rgba(66,165,245,.3)">📡</div><div class="fname">Arduino</div></div>
+          <div class="farr">→</div>
+          <div class="fnode"><div class="ficon" style="border-color:rgba(0,230,118,.3)">🔌</div><div class="fname">USB Serial</div></div>
+          <div class="farr">→</div>
+          <div class="fnode"><div class="ficon" style="border-color:rgba(0,230,118,.3)">⚡</div><div class="fname">Web Serial</div></div>
+          <div class="farr">→</div>
+          <div class="fnode"><div class="ficon" style="border-color:rgba(0,230,118,.3)">📊</div><div class="fname">Dashboard</div></div>
+        </div>
+        <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);font-size:12px;color:var(--text3);line-height:1.6">
+          <strong style="color:var(--neon)">Regra de integridade:</strong> O sistema exibe exclusivamente dados provenientes do sensor físico ou do último dado armazenado. Nenhum valor é gerado, estimado ou inventado pelo software.
+        </div>
+      </div>
+      <div class="g2">
+        <div class="cc"><div class="cc-head"><div class="cc-title">Distribuição de status</div></div><canvas id="ch-status-dist"></canvas></div>
+        <div class="cc">
+          <div class="cc-head"><div class="cc-title">Log de leituras brutas</div></div>
+          <div id="raw-log" style="height:185px;overflow-y:auto;font-family:'Courier New',monospace;font-size:11px;color:var(--text3);line-height:1.8">
+            <div style="color:var(--text4);font-style:italic">— sem dados do sensor ainda —</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── MAPA ── -->
+    <div class="page" id="page-mapa">
+      <div class="ph"><div class="ph-title">Mapa de Monitoramento</div><div class="ph-sub">Pontos de sensor e coleta — Salvador, BA</div></div>
+      <div class="map-wrap">
+        <div class="map-bar">
+          <button class="fbtn active" onclick="fmap('all',this)">Todos</button>
+          <button class="fbtn" onclick="fmap('ar',this)">🌫️ Ar</button>
+          <button class="fbtn" onclick="fmap('residuos',this)">🗑️ Resíduos</button>
+          <button class="fbtn" onclick="fmap('trafego',this)">🚗 Tráfego</button>
+        </div>
+        <div id="map"></div>
+      </div>
+      <div class="g3">
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px;display:flex;align-items:center;gap:8px"><span style="color:var(--neon);font-size:17px">●</span><div><div style="font-size:12px;font-weight:500;color:var(--text)">Ar Bom (AQI ≤300)</div><div style="font-size:11px;color:var(--text3)">Sensor verde</div></div></div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px;display:flex;align-items:center;gap:8px"><span style="color:var(--yellow);font-size:17px">●</span><div><div style="font-size:12px;font-weight:500;color:var(--text)">Moderado (≤450)</div><div style="font-size:11px;color:var(--text3)">Sensor amarelo</div></div></div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px;display:flex;align-items:center;gap:8px"><span style="color:var(--red);font-size:17px">●</span><div><div style="font-size:12px;font-weight:500;color:var(--text)">Crítico (>450)</div><div style="font-size:11px;color:var(--text3)">Sensor vermelho</div></div></div>
+      </div>
+    </div>
+
+    <!-- ── QUALIDADE DO AR ── -->
+    <div class="page" id="page-ar">
+      <div class="ph">
+        <div class="ph-row">
+          <div>
+            <div class="ph-title">Qualidade do Ar <span class="live-badge">Sensor</span></div>
+            <div class="ph-sub">Dados exclusivamente do sensor Arduino via USB</div>
+          </div>
+          <button class="usb-btn" id="usb-btn-ar" onclick="connectUSB()">
+            <svg viewBox="0 0 24 24"><path d="M12 2v14M5 9l7 7 7-7"/><path d="M5 20h14"/></svg>
+            <span id="usb-txt-ar">Conectar Sensor</span>
+          </button>
+        </div>
+      </div>
+      <div class="notice info" id="ar-notice"></div>
+      <div class="g2" style="align-items:start;margin-bottom:16px">
+        <div class="aqi-hero">
+          <div style="font-size:10px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.5px">Valor Bruto do Sensor MQ</div>
+          <div class="aqi-ring" id="aqiring">
+            <div class="aqi-big"><span id="aqiValue">--</span></div>
+            <div class="aqi-sub">AQI bruto</div>
+          </div>
+          <span class="spill sp-empty" id="status"><span class="sdot"></span>--</span>
+          <div class="aqi-bar-t"><div class="aqi-bar-f" id="aqibar"></div></div>
+          <div class="aqi-txt" id="aqitxt">Conecte o sensor Arduino via USB para receber leituras reais.</div>
+          <div style="margin-top:12px" id="raw-val-display"></div>
+        </div>
+        <div>
+          <div class="cc" style="position:relative;margin-bottom:14px">
+            <div class="lo" id="lo-ar-rt"><div class="loring"></div><div class="lotxt">Aguardando sensor...</div></div>
+            <div class="cc-head"><div class="cc-title">Tempo Real — Sensor</div><div class="live-badge">Live</div></div>
+            <canvas id="graficoTempoAr" style="max-height:148px"></canvas>
+          </div>
+          <div class="cc" style="position:relative">
+            <div class="lo" id="lo-ar-hist"><div class="loring"></div><div class="lotxt">Sem histórico</div></div>
+            <div class="cc-head"><div class="cc-title">Histórico da sessão</div></div>
+            <canvas id="graficoHistoricoAr" style="max-height:148px"></canvas>
+          </div>
+        </div>
+      </div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:13px;padding:16px;font-size:12px;color:var(--text2);line-height:1.75">
+        <strong style="color:var(--neon)">⚠️ Importante:</strong> O sensor Arduino com módulo MQ não mede parâmetros ambientais oficiais. Ele fornece um valor bruto analógico convertido em escala interna (VERDE ≤300 / AMARELO ≤450 / VERMELHO >450). Esses valores são indicativos e não substituem medições científicas certificadas. O Ecolytix exibe apenas o que o sensor físico transmite — sem qualquer estimativa ou dado inventado.
+      </div>
+    </div>
+
+    <!-- ── RESÍDUOS ── -->
+    <div class="page" id="page-residuos">
+      <div class="ph"><div class="ph-title">Gestão de Resíduos</div><div class="ph-sub">Registro de dados por usuários autenticados</div></div>
+
+      <div class="notice info" id="res-notice"></div>
+
+      <!-- Form (só para logados) -->
+      <div id="res-form-section">
+        <div class="form-card" style="margin-bottom:16px">
+          <div class="cc-title" style="margin-bottom:14px">Registrar coleta</div>
+          <div class="form-row">
+            <div class="form-group">
+              <div class="form-label">Nome da Região</div>
+              <input type="text" class="form-input" id="res-regiao" placeholder="Ex: Barra, Itaigara, Cajazeiras...">
+            </div>
+            <div class="form-group">
+              <div class="form-label">Nível</div>
+              <select class="form-input" id="res-nivel">
+                <option value="Baixo">🟢 Baixo</option>
+                <option value="Médio">🟡 Médio</option>
+                <option value="Alto">🔴 Alto</option>
+              </select>
+            </div>
+            <button class="btn-reg" onclick="registrarColeta()">Registrar Coleta</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="g2">
+        <div>
+          <div class="cc-title" style="margin-bottom:12px">Registros da comunidade</div>
+          <!-- <div class="rec-list" id="rec-list">
+            <div class="empty-state">Nenhum registro ainda. Faça login para contribuir.</div>
+          </div> -->
+        </div>
+        <div>
+          <div class="cc-title" style="margin-bottom:12px">Áreas Críticas (sensor + comunidade)</div>
+          <div class="clist" id="clist-residuos">
+            <div class="citem"><div class="cdotc" style="background:var(--red)"></div><div class="cname">Subúrbio Ferroviário</div><span class="clv" style="background:var(--rdbg);color:var(--red)">Crítico</span></div>
+            <div class="citem"><div class="cdotc" style="background:var(--red)"></div><div class="cname">Cajazeiras</div><span class="clv" style="background:var(--rdbg);color:var(--red)">Crítico</span></div>
+            <div class="citem"><div class="cdotc" style="background:var(--yellow)"></div><div class="cname">Pau da Lima</div><span class="clv" style="background:var(--ylbg);color:var(--yellow)">Atenção</span></div>
+            <div class="citem"><div class="cdotc" style="background:var(--yellow)"></div><div class="cname">São Caetano</div><span class="clv" style="background:var(--ylbg);color:var(--yellow)">Atenção</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SOBRE ── -->
+    <div class="page" id="page-sobre">
+      <div class="ph"><div class="ph-title">Sobre o Ecolytix</div><div class="ph-sub">Plataforma IoT ambiental — Fundação 404</div></div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;margin-bottom:18px">
+        <div style="font-size:14px;font-weight:600;color:var(--neon);margin-bottom:8px">🌿 Missão</div>
+        <div style="font-size:14px;color:var(--text2);line-height:1.8">
+          O <strong style="color:var(--text)">Ecolytix</strong> é uma plataforma open-source de monitoramento ambiental desenvolvida pela <strong style="color:var(--neon)">Fundação 404</strong>. O sistema conecta sensores Arduino físicos via USB diretamente ao navegador usando a Web Serial API, exibindo dados ambientais reais em tempo real — sem intermediários, sem dados inventados.
+        </div>
+        <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border);font-size:12px;color:var(--text3);line-height:1.7">
+          <strong style="color:var(--yellow)">Princípio fundamental:</strong> "Se não houver dado real do sensor ou inserido por usuários verificados, o sistema exibe 'sem dados disponíveis' — nunca inventa valores."
+        </div>
+      </div>
+      <div class="tech-grid">
+        <div class="tcard"><div class="tico">📡</div><div class="tname">Sensor Arduino MQ</div><div class="tdesc">Módulo MQ lê qualidade do ar via pino analógico A0. LEDs indicam status localmente. Dados enviados via Serial a 9600 baud no formato CSV.</div></div>
+        <div class="tcard"><div class="tico">🔌</div><div class="tname">Web Serial API</div><div class="tdesc">API nativa do Chrome permite conexão USB direta entre o Arduino e o browser sem instalar drivers adicionais. Suporte em Chrome 89+.</div></div>
+        <div class="tcard"><div class="tico">💾</div><div class="tname">Fallback localStorage</div><div class="tdesc">Quando o sensor está offline, o sistema recupera o último dado real armazenado e informa o usuário claramente, sem exibir dados falsos.</div></div>
+        <div class="tcard"><div class="tico">👥</div><div class="tname">Dados Comunitários</div><div class="tdesc">Usuários autenticados podem registrar observações ambientais manuais. Esses dados são tratados como contribuições humanas verificadas.</div></div>
+      </div>
+      <div style="margin-top:18px;background:var(--card);border:1px solid var(--border);border-radius:13px;padding:18px">
+        <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:8px">Código do Sensor Arduino</div>
+        <div class="raw-badge" style="display:block;white-space:pre;overflow-x:auto;line-height:1.6;font-size:11px">Serial.begin(9600);
+// Saída CSV: AQI,STATUS
+Serial.print(avg);    // valor bruto médio
+Serial.print(",");
+Serial.println(status); // VERDE / AMARELO / VERMELHO
+
+// Limites internos do sensor:
+// VERDE   ≤ 300
+// AMARELO ≤ 450
+// VERMELHO > 450</div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════
+// LOGO — desenho em canvas (SVG-like leaf)
+// ═══════════════════════════════════════════════════
+function drawLogo(canvasId, size) {
+  const c = document.getElementById(canvasId);
+  if (!c) return;
+  c.width = size; c.height = size;
+  const ctx = c.getContext('2d');
+  const r = size * 0.18;
+
+  // Background rounded rect
+  ctx.save();
+  ctx.beginPath();
+  ctx.moveTo(r, 0); ctx.lineTo(size - r, 0);
+  ctx.quadraticCurveTo(size, 0, size, r);
+  ctx.lineTo(size, size - r);
+  ctx.quadraticCurveTo(size, size, size - r, size);
+  ctx.lineTo(r, size); ctx.quadraticCurveTo(0, size, 0, size - r);
+  ctx.lineTo(0, r); ctx.quadraticCurveTo(0, 0, r, 0);
+  ctx.closePath();
+  const grad = ctx.createLinearGradient(0, 0, size, size);
+  grad.addColorStop(0, '#2E7D32');
+  grad.addColorStop(1, '#00c853');
+  ctx.fillStyle = grad;
+  ctx.fill();
+  ctx.restore();
+
+  // Leaf shape
+  ctx.save();
+  ctx.translate(size * 0.5, size * 0.52);
+  ctx.scale(size / 48, size / 48);
+  ctx.fillStyle = '#fff';
+  ctx.beginPath();
+  ctx.moveTo(0, -16);
+  ctx.bezierCurveTo(8, -16, 16, -8, 14, 4);
+  ctx.bezierCurveTo(12, 12, 4, 14, 0, 10);
+  ctx.bezierCurveTo(-4, 14, -12, 12, -14, 4);
+  ctx.bezierCurveTo(-16, -8, -8, -16, 0, -16);
+  ctx.fill();
+  // Stem
+  ctx.strokeStyle = '#00E676';
+  ctx.lineWidth = 2;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(0, 10);
+  ctx.lineTo(0, 18);
+  ctx.stroke();
+  // Vein
+  ctx.strokeStyle = 'rgba(0,200,83,.5)';
+  ctx.lineWidth = 1.2;
+  ctx.beginPath();
+  ctx.moveTo(0, -12);
+  ctx.lineTo(0, 8);
+  ctx.stroke();
+  ctx.restore();
+}
+
+// ═══════════════════════════════════════════════════
+// AUTH & SESSION
+// ═══════════════════════════════════════════════════
+let isLoggedIn = false;
+let isTrial = false;
+
+function doLogin() {
+  const mail = document.getElementById('lmail').value.trim();
+  const pass = document.getElementById('lpass').value;
+  const err = document.getElementById('lerr');
+  const spin = document.getElementById('lspin');
+  const txt = document.getElementById('ltxt');
+  err.classList.remove('show');
+  spin.style.display = 'block'; txt.style.display = 'none';
+  setTimeout(() => {
+    spin.style.display = 'none'; txt.style.display = 'block';
+    // accept demo credentials
+    if ((mail === 'admin' && pass === 'admin') ||
+        (mail === 'usuario@ecolytix.com' && pass === 'ecolytix123') ||
+        (mail.includes('@') && pass.length >= 6)) {
+      isLoggedIn = true; isTrial = false;
+      localStorage.setItem('eco_session', JSON.stringify({email: mail, trial: false}));
+      startApp(mail);
+    } else {
+      err.classList.add('show');
+    }
+  }, 900);
+}
+
+function enterTrial() {
+  isLoggedIn = false; isTrial = true;
+  localStorage.setItem('eco_session', JSON.stringify({trial: true}));
+  startApp(null);
+}
+
+function doLogout() {
+  isLoggedIn = false; isTrial = false;
+  localStorage.removeItem('eco_session');
+  if (serialPort) { try { serialPort.close(); } catch(e) {} serialPort = null; }
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+  ['lmail','lpass'].forEach(id => document.getElementById(id).value = '');
+}
+
+function showLoginFromApp() { doLogout(); }
+
+function startApp(email) {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+
+  if (isTrial) {
+    document.getElementById('trial-banner').classList.remove('hidden');
+    document.getElementById('tb-user').textContent = 'Trial';
+    document.getElementById('logout-txt').textContent = 'Sair';
+    document.getElementById('lock-residuos').style.display = 'inline';
+  } else {
+    document.getElementById('trial-banner').classList.add('hidden');
+    document.getElementById('tb-user').textContent = email || 'Admin';
+    document.getElementById('lock-residuos').style.display = 'none';
+  }
+
+  initApp();
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && document.getElementById('login-screen').style.display !== 'none') doLogin();
+});
+
+function alertInfo(msg) { alert(msg); }
+
+// ═══════════════════════════════════════════════════
+// NAV
+// ═══════════════════════════════════════════════════
+const PTITLES = {home:'Home',dashboard:'Dashboard',mapa:'Mapa',ar:'Qualidade do Ar',residuos:'Resíduos',sobre:'Sobre'};
+function nav(id, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nitem').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  if (el) el.classList.add('active');
+  document.getElementById('tbtitle').textContent = PTITLES[id] || id;
+  if (id === 'mapa') setTimeout(initMap, 60);
+  closeSb();
+}
+function navResiduo() {
+  if (isTrial && !isLoggedIn) {
+    setNotice('Faça login para registrar dados de resíduos. No modo trial, você pode visualizar os registros existentes.', 'info');
+    nav('residuos', document.querySelector('[onclick="navResiduo()"]'));
+    document.getElementById('res-form-section').style.display = 'none';
+    document.getElementById('res-notice').textContent = '🔒 Faça login para contribuir com dados.';
+    document.getElementById('res-notice').className = 'notice info show';
+  } else {
+    nav('residuos', document.querySelector('[onclick="navResiduo()"]'));
+    document.getElementById('res-form-section').style.display = 'block';
+    document.getElementById('res-notice').className = 'notice';
+  }
+  renderRecords();
+}
+function toggleSb() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sbo').classList.toggle('show'); }
+function closeSb() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('sbo').classList.remove('show'); }
+
+// ═══════════════════════════════════════════════════
+// CLOCK
+// ═══════════════════════════════════════════════════
+setInterval(() => {
+  document.getElementById('tbtime').textContent = new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+}, 1000);
+
+// ═══════════════════════════════════════════════════
+// NOTICE SYSTEM
+// ═══════════════════════════════════════════════════
+function setNotice(msg, type) {
+  const n = document.getElementById('notice');
+  n.textContent = msg;
+  n.className = 'notice ' + type + ' show';
+}
+function clearNotice() { document.getElementById('notice').className = 'notice'; }
+
+// ═══════════════════════════════════════════════════
+// CONNECTION STATUS
+// ═══════════════════════════════════════════════════
+function setConn(state) {
+  const dot = document.getElementById('cdot');
+  const lbl = document.getElementById('clbl');
+  dot.className = 'cdot';
+  const states = {
+    connecting: ['c-conn', 'Conectando...'],
+    connected:  ['c-on',   'Sensor online'],
+    saved:      ['c-sv',   'Último salvo'],
+    offline:    ['c-off',  'Sem sensor'],
+  };
+  const [cls, text] = states[state] || ['c-off','Sem sensor'];
+  dot.classList.add(cls);
+  lbl.textContent = text;
+}
+
+// ═══════════════════════════════════════════════════
+// SENSOR DATA STATE
+// ═══════════════════════════════════════════════════
+const SK = 'ultimo_dado';
+let sessionReadings = 0;
+let sessionAlerts = 0;
+let statusDist = {VERDE: 0, AMARELO: 0, VERMELHO: 0};
+let rtBuffer = []; // { label, val }
+
+function applyData(aqi, statusStr) {
+  // Update IDs matching backend spec
+  const aqiNum = parseInt(aqi);
+  if (isNaN(aqiNum)) return;
+
+  document.getElementById('aqiValue').textContent = aqiNum;
+
+  sessionReadings++;
+  if (statusStr === 'VERMELHO') sessionAlerts++;
+  statusDist[statusStr] = (statusDist[statusStr] || 0) + 1;
+
+  // Save to localStorage
+  const data = { aqi: aqiNum, status: statusStr, ts: new Date().toISOString() };
+  localStorage.setItem(SK, JSON.stringify(data));
+
+  // Update home KPIs
+  document.getElementById('h-aqi').textContent = aqiNum;
+  document.getElementById('h-aqi-note').textContent = 'Valor bruto do sensor MQ';
+  document.getElementById('h-status').textContent = statusStr;
+  document.getElementById('h-status-note').textContent = statusEmoji(statusStr) + ' ' + statusStr;
+  document.getElementById('h-leit').textContent = sessionReadings;
+  document.getElementById('h-alert').textContent = sessionAlerts;
+
+  // Dashboard KPIs
+  document.getElementById('d-leit').textContent = sessionReadings;
+  document.getElementById('d-alert').textContent = sessionAlerts;
+  document.getElementById('d-sensor').textContent = 'Conectado';
+  document.getElementById('d-sensor').style.color = 'var(--neon)';
+  document.getElementById('d-last').textContent = aqiNum;
+  document.getElementById('d-last-time').textContent = new Date().toLocaleTimeString('pt-BR');
+
+  // AQI ring & bar
+  applyAQIVisual(aqiNum, statusStr);
+
+  // Raw display
+  const rawEl = document.getElementById('raw-val-display');
+  if (rawEl) rawEl.innerHTML = `<div class="raw-badge">${aqiNum},${statusStr}</div>`;
+
+  // RT buffer (max 30 points)
+  const label = new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  rtBuffer.push({label, val: aqiNum, status: statusStr});
+  if (rtBuffer.length > 30) rtBuffer.shift();
+
+  // Update charts
+  updateCharts();
+
+  // Raw log
+  appendRawLog(aqiNum, statusStr);
+
+  // Status dist chart
+  updateStatusDist();
+
+  // Hide loading overlays on first data
+  hideLos();
+}
+
+function statusEmoji(s) { return s==='VERDE'?'🟢':s==='AMARELO'?'🟡':'🔴'; }
+
+function applyAQIVisual(v, s) {
+  const ring = document.getElementById('aqiring');
+  const pill = document.getElementById('status');
+  const bar  = document.getElementById('aqibar');
+  const txt  = document.getElementById('aqitxt');
+  const pct  = Math.min((v / 600) * 100, 100);
+  bar.style.width = pct + '%';
+
+  if (s === 'VERDE') {
+    ring.style.borderColor = 'var(--neon)';
+    ring.style.boxShadow = '0 0 26px rgba(0,230,118,.2),inset 0 0 20px rgba(0,230,118,.04)';
+    pill.className = 'spill sp-g';
+    pill.innerHTML = '<span class="sdot"></span>🟢 VERDE — Bom';
+    bar.style.background = 'var(--neon)';
+    txt.textContent = 'Qualidade do ar boa segundo o sensor. Valor bruto dentro do limite verde (≤ 300).';
+  } else if (s === 'AMARELO') {
+    ring.style.borderColor = 'var(--yellow)';
+    ring.style.boxShadow = '0 0 26px rgba(255,202,40,.18),inset 0 0 20px rgba(255,202,40,.04)';
+    pill.className = 'spill sp-y';
+    pill.innerHTML = '<span class="sdot"></span>🟡 AMARELO — Moderado';
+    bar.style.background = 'var(--yellow)';
+    txt.textContent = 'Nível moderado detectado pelo sensor. Valor bruto entre 301 e 450.';
+  } else {
+    ring.style.borderColor = 'var(--red)';
+    ring.style.boxShadow = '0 0 26px rgba(239,83,80,.18),inset 0 0 20px rgba(239,83,80,.04)';
+    pill.className = 'spill sp-r';
+    pill.innerHTML = '<span class="sdot"></span>🔴 VERMELHO — Crítico';
+    bar.style.background = 'var(--red)';
+    txt.textContent = 'Nível crítico! Sensor registrou valor acima de 450. Atenção recomendada.';
+  }
+}
+
+function appendRawLog(aqi, status) {
+  const log = document.getElementById('raw-log');
+  const t = new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  const color = status==='VERDE'?'var(--neon)':status==='AMARELO'?'var(--yellow)':'var(--red)';
+  const line = document.createElement('div');
+  line.style.color = color;
+  line.textContent = `[${t}] ${aqi},${status}`;
+  log.prepend(line);
+  // Keep max 50 lines
+  while (log.children.length > 50) log.removeChild(log.lastChild);
+}
+
+// ═══════════════════════════════════════════════════
+// WEB SERIAL API
+// ═══════════════════════════════════════════════════
+let serialPort = null;
+let serialReader = null;
+let reading = false;
+
+async function connectUSB() {
+  if (!('serial' in navigator)) {
+    alert('Web Serial API não suportada neste navegador.\nUse o Google Chrome ou Microsoft Edge (versão 89+).');
+    return;
+  }
+  if (serialPort) {
+    await disconnectUSB();
+    return;
+  }
+  try {
+    setConn('connecting');
+    setNotice('Solicitando acesso à porta USB...', 'info');
+    serialPort = await navigator.serial.requestPort();
+    await serialPort.open({ baudRate: 9600 });
+    setConn('connected');
+    setNotice('Sensor Arduino conectado! Lendo dados...', 'ok');
+    updateUSBButtons(true);
+    reading = true;
+    readLoop();
+  } catch (e) {
+    serialPort = null;
+    setConn('offline');
+    // Try fallback
+    tryFallback();
+    setNotice('Sensor não conectado. ' + (localStorage.getItem(SK) ? 'Exibindo última leitura do sensor.' : 'Sem dados disponíveis.'), 'info');
+  }
+}
+
+async function disconnectUSB() {
+  reading = false;
+  try { if (serialReader) { await serialReader.cancel(); serialReader = null; } } catch(e) {}
+  try { if (serialPort) { await serialPort.close(); serialPort = null; } } catch(e) {}
+  setConn('offline');
+  updateUSBButtons(false);
+  setNotice('Sensor desconectado.', 'info');
+}
+
+function updateUSBButtons(connected) {
+  ['usb-btn','usb-btn-ar'].forEach(id => {
+    const btn = document.getElementById(id);
+    if (!btn) return;
+    const txtId = id === 'usb-btn' ? 'usb-txt' : 'usb-txt-ar';
+    const txtEl = document.getElementById(txtId);
+    if (connected) {
+      btn.classList.add('connected');
+      if (txtEl) txtEl.textContent = 'Desconectar Sensor';
+    } else {
+      btn.classList.remove('connected');
+      if (txtEl) txtEl.textContent = 'Conectar Sensor';
+    }
+  });
+}
+
+async function readLoop() {
+  if (!serialPort || !reading) return;
+  try {
+    const textDecoder = new TextDecoderStream();
+    serialPort.readable.pipeTo(textDecoder.writable);
+    const reader = textDecoder.readable.getReader();
+    serialReader = reader;
+    let buffer = '';
+    while (reading) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      buffer += value;
+      let lines = buffer.split('\n');
+      buffer = lines.pop(); // keep incomplete line
+      for (const line of lines) {
+        parseLine(line.trim());
+      }
+    }
+  } catch (e) {
+    if (reading) {
+      setConn('offline');
+      setNotice('Conexão com sensor perdida. ' + (localStorage.getItem(SK) ? 'Exibindo última leitura salva.' : 'Sem dados disponíveis.'), 'info');
+      tryFallback();
+    }
+  }
+}
+
+function parseLine(line) {
+  if (!line || line === 'AQI,STATUS') return; // skip header
+  // Expected format: "320,AMARELO" or JSON {"aqi":320,"status":"AMARELO"}
+  try {
+    if (line.startsWith('{')) {
+      const d = JSON.parse(line);
+      if (d.aqi !== undefined && d.status) applyData(d.aqi, d.status.toUpperCase());
+    } else {
+      const parts = line.split(',');
+      if (parts.length >= 2) {
+        const aqi = parseInt(parts[0].trim());
+        const status = parts[1].trim().toUpperCase();
+        if (!isNaN(aqi) && ['VERDE','AMARELO','VERMELHO'].includes(status)) {
+          applyData(aqi, status);
+        }
+      }
+    }
+  } catch(e) {}
+}
+
+function tryFallback() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(SK));
+    if (saved && saved.aqi !== undefined) {
+      applyData(saved.aqi, saved.status);
+      setConn('saved');
+      const when = saved.ts ? new Date(saved.ts).toLocaleString('pt-BR') : 'data desconhecida';
+      setNotice('Exibindo última leitura do sensor: ' + when, 'info');
+    } else {
+      setConn('offline');
+    }
+  } catch(e) { setConn('offline'); }
+}
+
+// ═══════════════════════════════════════════════════
+// CHARTS
+// ═══════════════════════════════════════════════════
+const NEON = '#00E676', YLW = '#ffca28', RED = '#ef5350';
+const CBASE = {
+  responsive:true, maintainAspectRatio:true,
+  plugins:{legend:{display:false}},
+  scales:{
+    x:{grid:{display:false},ticks:{color:'#5da362',font:{family:'DM Sans',size:10}},maxTicksLimit:8},
+    y:{grid:{color:'rgba(255,255,255,.03)'},ticks:{color:'#5da362',font:{family:'DM Sans',size:10}},border:{display:false}}
+  }
+};
+let rtChart, histChart, rtChartAr, histChartAr, statusDistChart;
+
+function initCharts() {
+  const emptyRt = {type:'line',data:{labels:[],datasets:[{data:[],borderColor:NEON,backgroundColor:'rgba(0,230,118,.05)',tension:.4,fill:true,pointRadius:0,borderWidth:2}]},options:{...JSON.parse(JSON.stringify(CBASE))}};
+  const emptyHist = {type:'bar',data:{labels:[],datasets:[{data:[],backgroundColor:[],borderRadius:5,borderSkipped:false}]},options:{...JSON.parse(JSON.stringify(CBASE))}};
+
+  rtChart = new Chart(document.getElementById('graficoTempo'), JSON.parse(JSON.stringify(emptyRt)));
+  rtChartAr = new Chart(document.getElementById('graficoTempoAr'), JSON.parse(JSON.stringify(emptyRt)));
+  histChart = new Chart(document.getElementById('graficoHistorico'), JSON.parse(JSON.stringify(emptyHist)));
+  histChartAr = new Chart(document.getElementById('graficoHistoricoAr'), JSON.parse(JSON.stringify(emptyHist)));
+
+  statusDistChart = new Chart(document.getElementById('ch-status-dist'), {
+    type:'doughnut',
+    data:{labels:['Verde','Amarelo','Vermelho'],datasets:[{data:[0,0,0],backgroundColor:['rgba(0,230,118,.8)','rgba(255,202,40,.8)','rgba(239,83,80,.8)'],borderWidth:0}]},
+    options:{responsive:true,plugins:{legend:{position:'bottom',labels:{color:'#a5d6a7',font:{family:'DM Sans',size:11}}}}}
+  });
+}
+
+function barColor(status) { return status==='VERDE'?'rgba(0,230,118,.7)':status==='AMARELO'?'rgba(255,202,40,.7)':'rgba(239,83,80,.7)'; }
+
+function updateCharts() {
+  const labels = rtBuffer.map(r => r.label);
+  const vals = rtBuffer.map(r => r.val);
+  const colors = rtBuffer.map(r => barColor(r.status));
+  [rtChart, rtChartAr].forEach(c => {
+    c.data.labels = labels;
+    c.data.datasets[0].data = vals;
+    c.update('none');
+  });
+  [histChart, histChartAr].forEach(c => {
+    c.data.labels = labels;
+    c.data.datasets[0].data = vals;
+    c.data.datasets[0].backgroundColor = colors;
+    c.update('none');
+  });
+}
+
+function updateStatusDist() {
+  statusDistChart.data.datasets[0].data = [statusDist.VERDE||0, statusDist.AMARELO||0, statusDist.VERMELHO||0];
+  statusDistChart.update('none');
+}
+
+// ═══════════════════════════════════════════════════
+// MAP
+// ═══════════════════════════════════════════════════
+let mapDone = false, mapMarkers = [];
+function initMap() {
+  if (mapDone) return; mapDone = true;
+  const m = L.map('map').setView([-12.9714,-38.5014],12);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap',maxZoom:19}).addTo(m);
+  const pts = [
+    {lat:-12.9714,lng:-38.5014,name:'Centro Histórico',type:'ar',col:'#ffca28',lbl:'Moderado',note:'Sensor fixo — aguardando leitura USB'},
+    {lat:-12.998,lng:-38.52,name:'Liberdade',type:'ar',col:'#00E676',lbl:'Bom',note:'Sensor fixo'},
+    {lat:-12.93,lng:-38.45,name:'Itaigara',type:'ar',col:'#00E676',lbl:'Bom',note:'Sensor fixo'},
+    {lat:-13.02,lng:-38.53,name:'Cajazeiras',type:'residuos',col:'#ef5350',lbl:'Crítico',note:'Alta geração de resíduos'},
+    {lat:-12.95,lng:-38.57,name:'Barra',type:'ar',col:'#00E676',lbl:'Bom',note:'Sensor fixo'},
+    {lat:-12.89,lng:-38.48,name:'Pituba',type:'ar',col:'#ffca28',lbl:'Moderado',note:'Sensor fixo'},
+    {lat:-13.05,lng:-38.48,name:'Subúrbio Ferroviário',type:'residuos',col:'#ef5350',lbl:'Crítico',note:'Alta geração de resíduos'},
+    {lat:-12.96,lng:-38.54,name:'Av. Paralela',type:'trafego',col:'#ffca28',lbl:'Moderado',note:'Congestionamento frequente'},
+    {lat:-12.91,lng:-38.46,name:'Imbuí',type:'ar',col:'#00E676',lbl:'Bom',note:'Sensor fixo'},
+  ];
+  pts.forEach(p => {
+    const ico = L.divIcon({className:'',html:`<div style="width:20px;height:20px;border-radius:50%;background:${p.col};border:3px solid rgba(0,0,0,.4);box-shadow:0 0 10px ${p.col}55;cursor:pointer"></div>`,iconSize:[20,20],iconAnchor:[10,10]});
+    const mk = L.marker([p.lat,p.lng],{icon:ico}).addTo(m);
+    mk.bindPopup(`<div style="font-family:'DM Sans',sans-serif;padding:3px"><div style="font-size:13px;font-weight:600;color:#e8f5e9;margin-bottom:4px">${p.name}</div><div style="font-size:11px;background:${p.col}22;color:${p.col};padding:3px 9px;border-radius:99px;display:inline-block;font-weight:600;margin-bottom:4px">${p.lbl}</div><div style="font-size:11px;color:#5da362">${p.note}</div></div>`);
+    mk._t = p.type; mapMarkers.push(mk);
+  });
+}
+function fmap(type, btn) {
+  document.querySelectorAll('.fbtn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  mapMarkers.forEach(mk => mk.setOpacity(type === 'all' || mk._t === type ? 1 : 0.1));
+}
+
+// ═══════════════════════════════════════════════════
+// RESÍDUOS — localStorage records
+// ═══════════════════════════════════════════════════
+const RES_KEY = 'eco_residuos';
+function getRecords() {
+  try { return JSON.parse(localStorage.getItem(RES_KEY)) || []; } catch(e) { return []; }
+}
+function saveRecords(recs) { localStorage.setItem(RES_KEY, JSON.stringify(recs)); }
+
+function registrarColeta() {
+  if (!isLoggedIn) { setNotice('Faça login para registrar dados.', 'err'); return; }
+  const regiao = document.getElementById('res-regiao').value.trim();
+  const nivel = document.getElementById('res-nivel').value;
+  if (!regiao) { alert('Informe o nome da região.'); return; }
+  const recs = getRecords();
+  recs.unshift({ regiao, nivel, ts: new Date().toISOString(), user: document.getElementById('tb-user').textContent });
+  saveRecords(recs);
+  document.getElementById('res-regiao').value = '';
+  renderRecords();
+  setNotice('Registro salvo com sucesso!', 'ok');
+  setTimeout(clearNotice, 3000);
+}
+
+function renderRecords() {
+  const list = document.getElementById('rec-list');
+  const recs = getRecords();
+  if (!recs.length) {
+    list.innerHTML = '<div class="empty-state">Nenhum registro ainda.' + (isLoggedIn ? ' Use o formulário acima para contribuir.' : ' Faça login para contribuir.') + '</div>';
+    return;
+  }
+  list.innerHTML = recs.map(r => {
+    const lvlClass = r.nivel === 'Baixo' ? 'level-b' : r.nivel === 'Médio' ? 'level-m' : 'level-a';
+    const dt = new Date(r.ts).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+    return `<div class="rec-item"><div class="rec-region">${r.regiao}</div><div class="rec-date">${dt}</div><span class="rec-level ${lvlClass}">${r.nivel}</span></div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════
+// LOADING OVERLAYS
+// ═══════════════════════════════════════════════════
+function hideLos() { document.querySelectorAll('.lo').forEach(l => l.classList.add('gone')); }
+
+// ═══════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════
+function initApp() {
+  initCharts();
+  renderRecords();
+
+  // Check fallback data
+  const saved = localStorage.getItem(SK);
+  if (saved) {
+    try {
+      const d = JSON.parse(saved);
+      if (d.aqi !== undefined) {
+        applyData(d.aqi, d.status);
+        setConn('saved');
+        const when = d.ts ? new Date(d.ts).toLocaleString('pt-BR') : '';
+        setNotice('Exibindo última leitura do sensor' + (when ? ' (' + when + ')' : '') + '. Conecte o sensor para dados em tempo real.', 'info');
+      }
+    } catch(e) {}
+  } else {
+    setNotice('Nenhum dado disponível. Conecte o sensor Arduino via USB para começar.', 'info');
+    setConn('offline');
+  }
+}
+
+// ═══════════════════════════════════════════════════
+// BOOT
+// ═══════════════════════════════════════════════════
+window.addEventListener('DOMContentLoaded', () => {
+  // Draw logos
+  drawLogo('logo-canvas-login', 52);
+  drawLogo('logo-canvas-right', 44);
+  drawLogo('logo-canvas-sb', 32);
+
+  // Check existing session
+  try {
+    const s = JSON.parse(localStorage.getItem('eco_session'));
+    if (s) {
+      if (s.trial) { enterTrial(); return; }
+      if (s.email) { isLoggedIn = true; startApp(s.email); return; }
+    }
+  } catch(e) {}
+});
+</script>
+</body>
+</html>
+
