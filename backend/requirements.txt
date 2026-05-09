@@ -1,2 +1,8 @@
 fastapi
 uvicorn
+pyserial
+requests
+sqlalchemy
+solana
+solders
+python-dotenv
