@@ -4,7 +4,7 @@ from pydantic import BaseModel
 
 from database import SessionLocal, SensorData
 from ai_engine import generate_insight
-from blockchain import generate_hash
+from blockchain import write_to_blockchain
 
 app = FastAPI()
 
@@ -62,9 +62,9 @@ def receive_sensor_data(payload: SensorPayload):
 
     insight = generate_insight(payload.air_quality)
 
-    tx_hash = generate_hash({
-        "air_quality": payload.air_quality,
-        "status": payload.status
+    tx_hash = write_to_blockchain({
+    "air_quality": payload.air_quality,
+    "status": payload.status
     })
 
     db = SessionLocal()
