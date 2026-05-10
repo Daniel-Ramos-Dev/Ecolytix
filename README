@@ -7,8 +7,6 @@
 ![FastAPI](https://img.shields.io/badge/FastAPI-Backend-green)
 ![Status](https://img.shields.io/badge/Status-Working-brightgreen)
 
-
-
   Overview
 
 Ecolytix is a real-time environmental monitoring platform that combines IoT hardware, artificial intelligence, blockchain verification, and real-time dashboards.
@@ -94,7 +92,31 @@ Transparent monitoring history
 Users can inspect transaction hashes directly through Solana Explorer.
 
 Project Structure
-ecolytix/│├── arduino/│   └── sensor_node.ino│├── backend/│   ├── main.py│   ├── database.py│   ├── ai_engine.py│   ├── blockchain.py│   ├── serial_bridge.py│   └── requirements.txt│├── frontend/│   ├── index.html│   ├── css/│   │   └── style.css│   ││   └── js/│       ├── app.js│       ├── api.js│       └── charts.js│└── README.md
+
+ecolytix/
+│
+├── arduino/
+│   └── sensor_node.ino
+│
+├── backend/
+│   ├── main.py
+│   ├── database.py
+│   ├── ai_engine.py
+│   ├── blockchain.py
+│   ├── serial_bridge.py
+│   └── requirements.txt
+│
+├── frontend/
+│   ├── index.html
+│   ├── css/
+│   │   └── style.css
+│   │
+│   └── js/
+│       ├── app.js
+│       ├── api.js
+│       └── charts.js
+│
+└── README.md
 
 Setup
 1. Clone Repository
@@ -124,24 +146,40 @@ solana airdrop 1
 
 Hardware Wiring
 MQ135 → Arduino
-MQ135ArduinoVCC5VGNDGNDA0A0
+| MQ135 | Arduino |
+| ----- | ------- |
+| VCC   | 5V      |
+| GND   | GND     |
+| A0    | A0      |
+
 
 LEDs
-LEDPinGreen2Yellow3Red4
+| LED    | Pin |
+| ------ | --- |
+| Green  | 2   |
+| Yellow | 3   |
+| Red    | 4   |
 
-Running The Project
 Terminal 1
-cd backenduvicorn main:app --reload
+cd backend
+uvicorn main:app --reload
 
 Terminal 2
-cd backendpython3 serial_bridge.py
+cd backend
+python3 serial_bridge.py
 
 Frontend
 Open:
 frontend/index.html
 
 Example API Response
-{  "air_quality": 121,  "status": "GOOD",  "insight": "Environmental conditions stable.",  "tx_hash": "66WArmPByfUS..."}
+
+{
+  "air_quality": 121,
+  "status": "GOOD",
+  "insight": "Environmental conditions stable.",
+  "tx_hash": "66WArmPByfUS..."
+}
 
 Solana Verification
 Transactions can be verified on:
