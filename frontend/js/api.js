@@ -1,44 +1,19 @@
-const API_URL = 'http://127.0.0.1:8000';
-
 async function fetchLatestData() {
 
     try {
 
-        const response = await fetch(`${API_URL}/api/latest`);
+        const response = await fetch(
+            "http://127.0.0.1:8000/api/latest"
+        );
 
-        if (!response.ok) {
-            throw new Error('API ERROR');
-        }
+        const data = await response.json();
 
-        return await response.json();
+        return data;
 
-    } catch (err) {
+    } catch (error) {
 
-        console.error(err);
-
-        setConnectionStatus('OFFLINE');
+        console.error(error);
 
         return null;
     }
-}
-
-async function startPolling() {
-
-    setInterval(async () => {
-
-        const data = await fetchLatestData();
-
-        if (!data) return;
-
-        setConnectionStatus('ONLINE');
-
-        applyData(data.air_quality, data.status);
-
-        updateCharts(data.air_quality, data.status);
-
-        addLog(
-            `[${new Date().toLocaleTimeString()}] AQI: ${data.air_quality} | ${data.status}`
-        );
-
-    }, 2000);
 }

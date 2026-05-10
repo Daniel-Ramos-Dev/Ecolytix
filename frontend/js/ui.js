@@ -41,3 +41,16 @@ function setConnectionStatus(status) {
         el.style.color = '#FF5252';
     }
 }
+
+function updateAI(analysis) {
+
+    const logs = document.getElementById('logs');
+
+    const item = document.createElement('div');
+
+    item.classList.add('log-item');
+
+    item.innerText = `AI Insight: ${analysis}`;
+
+    logs.prepend(item);
+}

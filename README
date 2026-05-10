@@ -1,0 +1,191 @@
+# 🌍 EcolytixDecentralized environmental monitoring infrastructure powered by real-world IoT sensors and verified on Solana blockchain.---# 🚀 OverviewEcolytix is a real-time environmental monitoring platform that combines:- IoT sensors- Artificial Intelligence- Blockchain verification- Real-time dashboardsThe system captures air quality data using physical sensors, processes the information through an AI analysis engine, and stores verifiable telemetry records on Solana Devnet.Our goal is to create transparent and tamper-proof environmental monitoring infrastructure for smart cities, industries, and public spaces.---# 🧠 Key Features✅ Real-time air quality monitoring✅ Physical IoT hardware integration✅ AI-powered environmental trend analysis✅ Solana blockchain verification✅ Immutable telemetry records✅ Real-time dashboard visualization✅ Modular and scalable architecture---# 🏗️ Architecture```textMQ135 Sensor     ↓Arduino Uno     ↓ USB SerialPython Serial Bridge     ↓FastAPI Backend     ↓AI Analysis Engine     ↓Solana Devnet Memo Program     ↓SQLite Database     ↓Web Dashboard
+
+🔌 Hardware Components
+ComponentPurposeArduino UnoSensor controllerMQ135Air quality sensorLEDsVisual pollution indicatorsUSB SerialData transmissionComputer/LinuxEdge processing
+
+⚙️ Software Stack
+Backend
+
+
+Python
+
+
+FastAPI
+
+
+SQLite
+
+
+Solana SDK
+
+
+PySerial
+
+
+Frontend
+
+
+HTML
+
+
+CSS
+
+
+JavaScript
+
+
+Blockchain
+
+
+Solana Devnet
+
+
+Memo Program
+
+
+
+🧬 AI Engine
+The AI module analyzes historical environmental readings to identify:
+
+
+Pollution spikes
+
+
+Air quality improvement trends
+
+
+Stable environmental conditions
+
+
+The analysis engine compares historical averages against recent readings to generate real-time insights.
+
+⛓️ Blockchain Verification
+Each environmental reading is written to Solana Devnet using the Memo Program.
+This creates:
+
+
+Verifiable telemetry
+
+
+Immutable environmental records
+
+
+Transparent monitoring history
+
+
+Users can inspect every transaction directly on Solana Explorer.
+
+📁 Project Structure
+ecolytix/│├── arduino/│   └── sensor_node.ino│├── backend/│   ├── main.py│   ├── database.py│   ├── ai_engine.py│   ├── blockchain.py│   ├── serial_bridge.py│   └── requirements.txt│├── frontend/│   ├── index.html│   ├── css/│   │   └── style.css│   ││   └── js/│       ├── app.js│       ├── api.js│       └── charts.js│└── README.md
+
+🚀 Setup
+1️⃣ Clone Repository
+git clone https://github.com/YOUR_USERNAME/ecolytix.gitcd ecolytix
+
+2️⃣ Create Virtual Environment
+python3 -m venv venv
+
+3️⃣ Activate Virtual Environment
+source venv/bin/activate
+
+4️⃣ Install Dependencies
+cd backendpip install -r requirements.txt
+
+🔑 Solana Setup
+Install Solana CLI
+https://solana.com/docs/intro/installation
+
+Create Wallet
+solana-keygen new
+
+Configure Devnet
+solana config set --url devnet
+
+Request Devnet SOL
+solana airdrop 1
+
+🔌 Hardware Wiring
+MQ135 → Arduino
+MQ135ArduinoVCC5VGNDGNDA0A0
+
+LEDs
+LEDPinGreen2Yellow3Red4
+
+▶️ Running The Project
+Terminal 1
+cd backenduvicorn main:app --reload
+
+Terminal 2
+cd backendpython3 serial_bridge.py
+
+🌐 Frontend
+Open:
+frontend/index.html
+
+📊 Example API Response
+{  "air_quality": 121,  "status": "GOOD",  "insight": "Environmental conditions stable.",  "tx_hash": "66WArmPByfUS..."}
+
+🔍 Solana Verification
+Transactions can be verified on:
+https://explorer.solana.com/?cluster=devnet
+
+🌎 Use Cases
+
+
+Smart cities
+
+
+Industrial pollution monitoring
+
+
+Environmental transparency
+
+
+Public health infrastructure
+
+
+Decentralized environmental telemetry
+
+
+Real-time monitoring networks
+
+
+
+🔮 Future Improvements
+
+
+Multi-node sensor networks
+
+
+GPS geolocation
+
+
+Predictive ML models
+
+
+Mobile app
+
+
+NFT environmental certifications
+
+
+DAO-based environmental governance
+
+
+Real-time public alert system
+
+
+
+👨‍💻 Team
+Daniel Lima Ramos
+Software Engineering / Backend / IoT / Blockchain / Presentation
+
+Helen Costa Fernandez Ventura
+UI/UX Design / Product Design
+
+Arthur Felipe Lima Bomfim
+Frontend Engineering / UI development / Research
+
+🏁 Hackathon
+Built for the Solana Global Hackathon.
+
